@@ -24,13 +24,6 @@
     },
     "resource_type": "iam_policy"
   },
-  "task3_ap": {
-    "resource_type": "api_gateway",
-    "deploy_stage": "api",
-    "dependencies": [],
-    "resources": {},
-    "minimum_compression_size": 0
-  },
   "hello_world-role": {
     "predefined_policies": [],
     "principal_service": "lambda",
