@@ -1,5 +1,4 @@
 package com.task05;
-
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -7,14 +6,10 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
-import com.amazonaws.services.dynamodbv2.document.internal.InternalUtils;
-import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.model.RetentionSetting;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -26,7 +21,7 @@ import java.util.UUID;
 public class ApiHandler implements RequestHandler<Map<String, Object>, Map<String, Object>> {
 
 	private static final DynamoDB dynamoDB = new DynamoDB(AmazonDynamoDBClientBuilder.defaultClient());
-	private static final String TABLE_NAME = "Events";
+	private static final String TABLE_NAME = "cmtr-36484994-Events-test";  // Updated table name
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	public Map<String, Object> handleRequest(Map<String, Object> input, Context context) {
@@ -54,19 +49,15 @@ public class ApiHandler implements RequestHandler<Map<String, Object>, Map<Strin
 			table.putItem(event);
 
 			// Prepare the response
-			response.put("statusCode", 201);
+			response.put("statusCode", 201);  // Ensure statusCode is correctly set in the success path
 			response.put("body", objectMapper.writeValueAsString(event.asMap()));
 		} catch (IllegalArgumentException e) {
 			context.getLogger().log("Validation Error: " + e.getMessage());
-			response.put("statusCode", 400);
+			response.put("statusCode", 400);  // Make sure to include statusCode in all branches
 			response.put("body", e.getMessage());
-		} catch (ResourceNotFoundException e) {
-			context.getLogger().log("DynamoDB Table Error: " + e.getMessage());
-			response.put("statusCode", 404);
-			response.put("body", "DynamoDB table not found.");
 		} catch (Exception e) {
 			context.getLogger().log("Internal Error: " + e.getMessage());
-			response.put("statusCode", 500);
+			response.put("statusCode", 500);  // Make sure to include statusCode in all branches
 			response.put("body", "Internal server error occurred.");
 		}
 		return response;

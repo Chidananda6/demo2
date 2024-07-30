@@ -40,8 +40,9 @@
       "/events": {
         "enable_cors": false,
         "POST": {
-          "authorization_type": "AWS_IAM",
-          "integration_type": "mock",
+          "authorization_type": "NONE",
+          "integration_type": "lambada",
+          "lambda_name": "api_handler",
           "api_key_required": false,
           "method_request_parameters": {},
           "integration_request_body_template": {},
@@ -53,7 +54,7 @@
     },
     "minimum_compression_size": 0
   },
-  "EventsTable": {
+  "Events": {
     "resource_type": "dynamodb_table",
     "hash_key_name": "id",
     "hash_key_type": "S",
