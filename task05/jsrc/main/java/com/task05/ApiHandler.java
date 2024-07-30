@@ -7,57 +7,51 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.syndicate.deployment.annotations.lambda.LambdaHandler;
+import com.syndicate.deployment.model.RetentionSetting;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ApiHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
+@LambdaHandler(lambdaName = "api_handler",
+		roleName = "api_handler-role",
+		isPublishVersion = false,
+		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED)
+public class ApiHandler implements RequestHandler<Map<String, Object>, Map<String, Object>> {
 
 	private static final DynamoDB dynamoDB = new DynamoDB(AmazonDynamoDBClientBuilder.defaultClient());
 	private static final String TABLE_NAME = "Events";
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	private static final ObjectMapper objectMapper = new ObjectMapper();
 
-	@Override
-	public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
-		Map<String, Object> body = (Map<String, Object>) input.get("body");
-		Integer principalId = (Integer) body.get("principalId");
-		Map content = (Map) body.get("content");
-
-		String eventId = UUID.randomUUID().toString();
-		String createdAt = java.time.ZonedDateTime.now().toString();
-
+	public Map<String, Object> handleRequest(Map<String, Object> input, Context context) {
+		Map<String, Object> response = new HashMap<>();
 		try {
-			Table table = dynamoDB.getTable(TABLE_NAME);
-			Item item = new Item()
+			Map<String, String> content = (Map<String, String>) input.get("content");
+			Integer principalId = Integer.valueOf(input.get("principalId").toString());
+			String eventId = UUID.randomUUID().toString();
+			String createdAt = java.time.ZonedDateTime.now().toString();
+
+			// Create an event item
+			Item event = new Item()
 					.withPrimaryKey("id", eventId)
 					.withNumber("principalId", principalId)
 					.withString("createdAt", createdAt)
 					.withMap("body", content);
-			table.putItem(item);
 
-			return new ApiGatewayResponse(201, OBJECT_MAPPER.writeValueAsString(item.asMap()));
+			// Save the event item in DynamoDB
+			Table table = dynamoDB.getTable(TABLE_NAME);
+			table.putItem(event);
+
+			// Prepare the response
+			response.put("statusCode", 201);
+			response.put("event", objectMapper.writeValueAsString(event.asMap()));
 		} catch (Exception e) {
-			e.printStackTrace();
-			return new ApiGatewayResponse(500, "{\"message\": \"Error saving the event.\"}");
+			context.getLogger().log("Error: " + e.getMessage());
+			response.put("statusCode", 500);
+			response.put("body", "Failed to create event.");
 		}
+		return response;
 	}
-}
-
-class ApiGatewayResponse {
-	private final int statusCode;
-	private final String body;
-
-	public ApiGatewayResponse(int statusCode, String body) {
-		this.statusCode = statusCode;
-		this.body = body;
-	}
-
-	public int getStatusCode() {
-		return statusCode;
-	}
-
-	public String getBody() {
-		return body;
-	}
-// Getters and Setters
 }
