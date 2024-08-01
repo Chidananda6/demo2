@@ -61,6 +61,7 @@ public class UuidGenerator implements RequestHandler<ScheduledEvent, Map<String,
 
 		try (FileWriter writer = new FileWriter(file)) {
 			writer.write(content);
+			context.getLogger().log("File written successfully: " + file.getAbsolutePath());
 		} catch (IOException e) {
 			e.printStackTrace();
 			Map<String, Object> errorResult = new HashMap<>();
@@ -69,7 +70,16 @@ public class UuidGenerator implements RequestHandler<ScheduledEvent, Map<String,
 			return errorResult;
 		}
 
-		amazonS3.putObject(new PutObjectRequest(BUCKET_NAME, key, file));
+		try {
+			amazonS3.putObject(new PutObjectRequest(BUCKET_NAME, key, file));
+			context.getLogger().log("File uploaded successfully to S3: " + BUCKET_NAME + "/" + key);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Map<String, Object> errorResult = new HashMap<>();
+			errorResult.put("statusCode", 500);
+			errorResult.put("body", "Error uploading file to S3: " + e.getMessage());
+			return errorResult;
+		}
 
 		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("statusCode", 200);
