@@ -10,7 +10,7 @@
             "dynamodb:GetItem",
             "dynamodb:Query",
             "dynamodb:PutItem",
-            "dynamodb:BatchWriteItem",
+            "dynamodb:Batch*",
             "dynamodb:DeleteItem",
             "ssm:PutParameter",
             "ssm:GetParameter",
@@ -32,19 +32,6 @@
     ],
     "resource_type": "iam_role"
   },
-  "api_handler": {
-    "resource_type": "lambda_function",
-    "handler": "com.example.ApiHandler::handleRequest",
-    "runtime": "java8",
-    "memory_size": 512,
-    "timeout": 30,
-    "role": "api_handler-role",
-    "environment_variables": {
-      "DYNAMODB_TABLE": "Events"
-    },
-    "dependencies": [],
-    "lambda_execution_role": "api_handler-role"
-  },
   "task5_api": {
     "resource_type": "api_gateway",
     "deploy_stage": "api",
@@ -54,7 +41,7 @@
         "enable_cors": false,
         "POST": {
           "authorization_type": "NONE",
-          "integration_type": "lambda",
+          "integration_type": "lambada",
           "lambda_name": "api_handler",
           "api_key_required": false,
           "method_request_parameters": {},
@@ -69,21 +56,13 @@
   },
   "Events": {
     "resource_type": "dynamodb_table",
-    "attribute_definitions": [
-      {
-        "AttributeName": "id",
-        "AttributeType": "S"
-      }
-    ],
-    "key_schema": [
-      {
-        "AttributeName": "id",
-        "KeyType": "HASH"
-      }
-    ],
-    "provisioned_throughput": {
-      "ReadCapacityUnits": 5,
-      "WriteCapacityUnits": 5
-    }
+    "hash_key_name": "id",
+    "hash_key_type": "S",
+    "sort_key_name": "principalId",
+    "sort_key_type": "N",
+    "read_capacity": 1,
+    "write_capacity": 1,
+    "global_indexes": [],
+    "autoscaling": []
   }
 }
