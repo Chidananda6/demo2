@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>task08-group</groupId>
-    <artifactId>task08</artifactId>
-    <version>1.0.0</version>
+    <artifactId>weather-lambda-java</artifactId> <!-- Updated artifactId -->
+    <version>1.0-SNAPSHOT</version> <!-- Updated version -->
 
     <properties>
         <maven-shade-plugin.version>3.5.2</maven-shade-plugin.version>
@@ -19,27 +19,24 @@
     </properties>
 
     <dependencies>
-        <!-- AWS dependencies-->
+        <!-- AWS dependencies -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
             <version>1.2.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-lambda-java-events</artifactId>
-            <version>3.11.0</version>
-        </dependency>
-        <!--Syndicate annotations-->
+        <!-- Syndicate annotations -->
         <dependency>
             <groupId>net.sf.aws-syndicate</groupId>
             <artifactId>deployment-configuration-annotations</artifactId>
             <version>${syndicate.java.plugin.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
+            <groupId>com.task08</groupId>
+            <artifactId>lambda-layer</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/layer/java/lib/weather-lambda-java-1.0-SNAPSHOT.jar</systemPath>
         </dependency>
     </dependencies>
 
@@ -49,7 +46,7 @@
             <resource>
                 <directory>${resources.dir}</directory>
             </resource>
-        </resources>        
+        </resources>
         <plugins>
             <plugin>
                 <groupId>net.sf.aws-syndicate</groupId>
@@ -59,7 +56,7 @@
                     <packages>
                         <package>com.task08</package>
                     </packages>
-                    <fileName>${project.name}-${project.version}.jar</fileName>
+                    <fileName>${project.artifactId}-${project.version}.jar</fileName> <!-- Updated to match artifactId and version -->
                 </configuration>
                 <executions>
                     <execution>
@@ -89,6 +86,7 @@
                         </filter>
                     </filters>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <finalName>weather-lambda-java-1.0-SNAPSHOT</finalName> <!-- Added to specify the final name -->
                 </configuration>
                 <executions>
                     <execution>
@@ -101,5 +99,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
