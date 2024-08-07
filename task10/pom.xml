@@ -41,6 +41,18 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.32</version>
         </dependency>
+        <!-- AWS SDK for Cognito Identity Provider -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-cognitoidp</artifactId>
+            <version>1.12.300</version>
+        </dependency>
+        <!-- AWS Lambda Java Events Library (for Lambda integration) -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-events</artifactId>
+            <version>3.12.0</version>
+        </dependency>
         <!-- Syndicate Dependencies -->
 <!--        <dependency>-->
 <!--            <groupId>com.syndicate</groupId>-->
