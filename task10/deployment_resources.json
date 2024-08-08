@@ -87,10 +87,10 @@
       "/tables": {
         "enable_cors": false,
         "POST": {
-          "authorization_type": "COGNITO_USER_POOLS",
+          "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
-          "api_key_required": true,
+          "api_key_required": false,
           "method_request_parameters": {},
           "integration_request_body_template": {},
           "responses": [],
@@ -98,10 +98,10 @@
           "default_error_pattern": true
         },
         "GET": {
-          "authorization_type": "COGNITO_USER_POOLS",
+          "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
-          "api_key_required": true,
+          "api_key_required": false,
           "method_request_parameters": {},
           "integration_request_body_template": {},
           "responses": [],
@@ -112,10 +112,10 @@
       "/tables/{tableID}": {
         "enable_cors": false,
         "GET": {
-          "authorization_type": "COGNITO_USER_POOLS",
+          "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
-          "api_key_required": true,
+          "api_key_required": false,
           "method_request_parameters": {},
           "integration_request_body_template": {},
           "responses": [],
@@ -126,10 +126,10 @@
       "/reservations": {
         "enable_cors": false,
         "POST": {
-          "authorization_type": "COGNITO_USER_POOLS",
+          "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
-          "api_key_required": true,
+          "api_key_required": false,
           "method_request_parameters": {},
           "integration_request_body_template": {},
           "responses": [],
@@ -137,10 +137,10 @@
           "default_error_pattern": true
         },
         "GET": {
-          "authorization_type": "COGNITO_USER_POOLS",
+          "authorization_type": "NONE",
           "integration_type": "lambda",
           "lambda_name": "api_handler",
-          "api_key_required": true,
+          "api_key_required": false,
           "method_request_parameters": {},
           "integration_request_body_template": {},
           "responses": [],
