@@ -24,6 +24,11 @@
             <artifactId>aws-lambda-java-core</artifactId>
             <version>1.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>cognitoidentityprovider</artifactId>
+            <version>2.26.21</version>
+        </dependency>
         <!-- AWS SDK Dependencies -->
         <dependency>
             <groupId>com.amazonaws</groupId>
@@ -47,18 +52,28 @@
             <artifactId>aws-java-sdk-cognitoidp</artifactId>
             <version>1.12.300</version>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-log4j2</artifactId>
+            <version>1.5.0</version>
+        </dependency>
         <!-- AWS Lambda Java Events Library (for Lambda integration) -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
             <version>3.12.0</version>
         </dependency>
-        <!-- Syndicate Dependencies -->
-<!--        <dependency>-->
-<!--            <groupId>com.syndicate</groupId>-->
-<!--            <artifactId>syndicate-deployment</artifactId>-->
-<!--            <version>1.0.0</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20210307</version>
+        </dependency>
+        <!-- Syndicate Deployment Annotations (Fix) -->
+        <dependency>
+            <groupId>net.sf.aws-syndicate</groupId>
+            <artifactId>deployment-configuration-annotations</artifactId>
+            <version>${syndicate.java.plugin.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

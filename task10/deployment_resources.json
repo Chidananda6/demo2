@@ -14,7 +14,16 @@
             "dynamodb:DeleteItem",
             "ssm:PutParameter",
             "ssm:GetParameter",
-            "kms:Decrypt"
+            "kms:Decrypt",
+            "cognito-idp:DescribeUserPool",
+            "cognito-idp:GetUser",
+            "cognito-idp:ListUsers",
+            "cognito-idp:AdminCreateUser",
+            "cognito-idp:AdminInitiateAuth",
+            "cognito-idp:GetIdentityProviderByIdentifier",
+            "cognito-idp:ListUserPools",
+            "cognito-idp:ListUserPoolClients",
+            "cognito-idp:AdminRespondToAuthChallenge"
           ],
           "Effect": "Allow",
           "Resource": "*"
@@ -35,13 +44,24 @@
   "task10_api": {
     "resource_type": "api_gateway",
     "deploy_stage": "api",
+    "authorizers": {
+      "authorizer": {
+        "type": "COGNITO_USER_POOLS",
+        "identity_source": "method.request.header.Authorization",
+        "user_pools": [
+          "${simple-booking-userpool}"
+        ],
+        "ttl": 300
+      }
+    },
     "dependencies": [],
     "resources": {
       "/signup": {
         "enable_cors": false,
         "POST": {
-          "authorization_type": "AWS_IAM",
-          "integration_type": "mock",
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "api_handler",
           "api_key_required": false,
           "method_request_parameters": {},
           "integration_request_body_template": {},
@@ -53,8 +73,9 @@
       "/signin": {
         "enable_cors": false,
         "POST": {
-          "authorization_type": "AWS_IAM",
-          "integration_type": "mock",
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "api_handler",
           "api_key_required": false,
           "method_request_parameters": {},
           "integration_request_body_template": {},
@@ -66,9 +87,10 @@
       "/tables": {
         "enable_cors": false,
         "POST": {
-          "authorization_type": "AWS_IAM",
-          "integration_type": "mock",
-          "api_key_required": false,
+          "authorization_type": "COGNITO_USER_POOLS",
+          "integration_type": "lambda",
+          "lambda_name": "api_handler",
+          "api_key_required": true,
           "method_request_parameters": {},
           "integration_request_body_template": {},
           "responses": [],
@@ -76,9 +98,24 @@
           "default_error_pattern": true
         },
         "GET": {
-          "authorization_type": "AWS_IAM",
-          "integration_type": "mock",
-          "api_key_required": false,
+          "authorization_type": "COGNITO_USER_POOLS",
+          "integration_type": "lambda",
+          "lambda_name": "api_handler",
+          "api_key_required": true,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true
+        }
+      },
+      "/tables/{tableID}": {
+        "enable_cors": false,
+        "GET": {
+          "authorization_type": "COGNITO_USER_POOLS",
+          "integration_type": "lambda",
+          "lambda_name": "api_handler",
+          "api_key_required": true,
           "method_request_parameters": {},
           "integration_request_body_template": {},
           "responses": [],
@@ -89,9 +126,10 @@
       "/reservations": {
         "enable_cors": false,
         "POST": {
-          "authorization_type": "AWS_IAM",
-          "integration_type": "mock",
-          "api_key_required": false,
+          "authorization_type": "COGNITO_USER_POOLS",
+          "integration_type": "lambda",
+          "lambda_name": "api_handler",
+          "api_key_required": true,
           "method_request_parameters": {},
           "integration_request_body_template": {},
           "responses": [],
@@ -99,9 +137,10 @@
           "default_error_pattern": true
         },
         "GET": {
-          "authorization_type": "AWS_IAM",
-          "integration_type": "mock",
-          "api_key_required": false,
+          "authorization_type": "COGNITO_USER_POOLS",
+          "integration_type": "lambda",
+          "lambda_name": "api_handler",
+          "api_key_required": true,
           "method_request_parameters": {},
           "integration_request_body_template": {},
           "responses": [],
@@ -113,20 +152,20 @@
     "minimum_compression_size": 0
   },
   "simple-booking-userpool": {
-    "resource_type": "cognito_idp",
-    "password_policy": {
-      "minimum_length": 8,
-      "require_uppercase": true,
-      "require_symbols": true,
-      "require_lowercase": true,
-      "require_numbers": true
-    },
+        "resource_type": "cognito_idp",
+        "password_policy": {
+        "minimum_length": 12,
+        "require_uppercase": true,
+        "require_symbols": true,
+        "require_lowercase": true,
+        "require_numbers": true
+      },
     "auto_verified_attributes": [],
     "sms_configuration": {},
     "username_attributes": [],
     "custom_attributes": [],
     "client": {}
-  },
+    },
   "Tables": {
     "resource_type": "dynamodb_table",
     "hash_key_name": "id",

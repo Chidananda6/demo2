@@ -45,6 +45,11 @@
             <artifactId>deployment-configuration-annotations</artifactId>
             <version>${syndicate.java.plugin.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-cognitoidp</artifactId>
+            <version>1.12.573</version> <!-- or latest version -->
+        </dependency>
 
         <!-- SLF4J for logging -->
         <dependency>
