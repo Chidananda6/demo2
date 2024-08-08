@@ -16,10 +16,22 @@ import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.ResourceType;
 import com.syndicate.deployment.annotations.resources.DependsOn;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
+import com.amazonaws.services.dynamodbv2.model.ScanRequest;
+import com.amazonaws.services.dynamodbv2.model.ScanResult;
+import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest;
+import com.amazonaws.services.dynamodbv2.model.UpdateItemResult;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 @DependsOn(resourceType = ResourceType.COGNITO_USER_POOL, name = "simple-booking-userpool")
 @LambdaHandler(
@@ -36,6 +48,8 @@ import org.json.JSONObject;
 public class ApiHandler implements RequestHandler<Map<String, Object>, Map<String, Object>> {
 
 	private final AWSCognitoIdentityProvider cognitoClient;
+	private final AmazonDynamoDB dynamoDBClient;
+	private final DynamoDB dynamoDB;
 	private final String clientId;
 
 	public ApiHandler() {
@@ -43,6 +57,11 @@ public class ApiHandler implements RequestHandler<Map<String, Object>, Map<Strin
 				.withRegion(System.getenv("REGION"))
 				.build();
 
+		this.dynamoDBClient = AmazonDynamoDBClientBuilder.standard()
+				.withRegion(System.getenv("REGION"))
+				.build();
+
+		this.dynamoDB = new DynamoDB(dynamoDBClient);
 		this.clientId = System.getenv("CLIENT_ID");
 	}
 
@@ -57,6 +76,16 @@ public class ApiHandler implements RequestHandler<Map<String, Object>, Map<Strin
 				response = handleSignup(request);
 			} else if ("/signin".equals(resource) && "POST".equals(httpMethod)) {
 				response = handleSignin(request);
+			} else if ("/tables".equals(resource) && "GET".equals(httpMethod)) {
+				response = handleGetTables(request);
+			} else if ("/tables".equals(resource) && "POST".equals(httpMethod)) {
+				response = handleCreateTable(request);
+			} else if (resource.startsWith("/tables/") && "GET".equals(httpMethod)) {
+				response = handleGetTableById(request);
+			} else if ("/reservations".equals(resource) && "POST".equals(httpMethod)) {
+				response = handleCreateReservation(request);
+			} else if ("/reservations".equals(resource) && "GET".equals(httpMethod)) {
+				response = handleGetReservations(request);
 			} else {
 				response.put("statusCode", 400);
 				response.put("body", "Invalid request");
@@ -114,6 +143,108 @@ public class ApiHandler implements RequestHandler<Map<String, Object>, Map<Strin
 		Map<String, Object> response = new HashMap<>();
 		response.put("statusCode", 200);
 		response.put("body", new JSONObject().put("accessToken", idToken).toString());
+		return response;
+	}
+
+	private Map<String, Object> handleGetTables(Map<String, Object> request) {
+		Table table = dynamoDB.getTable("Tables");
+		ScanRequest scanRequest = new ScanRequest().withTableName("Tables");
+		ScanResult result = dynamoDBClient.scan(scanRequest);
+
+		JSONArray tables = new JSONArray();
+		result.getItems().forEach(item -> tables.put(new JSONObject(item)));
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("statusCode", 200);
+		response.put("body", new JSONObject().put("tables", tables).toString());
+		return response;
+	}
+
+	private Map<String, Object> handleCreateTable(Map<String, Object> request) {
+		JSONObject requestBody = new JSONObject((String) request.get("body"));
+		String id = requestBody.getString("id");
+		String number = requestBody.getString("number");
+		String places = requestBody.getString("places");
+		String isVip = requestBody.getString("isVip");
+		String minOrder = requestBody.optString("minOrder");
+
+		Map<String, AttributeValue> item = new HashMap<>();
+		item.put("id", new AttributeValue(id));
+		item.put("number", new AttributeValue(number));
+		item.put("places", new AttributeValue(places));
+		item.put("isVip", new AttributeValue(isVip));
+		if (minOrder != null && !minOrder.isEmpty()) {
+			item.put("minOrder", new AttributeValue(minOrder));
+		}
+
+		PutItemRequest putItemRequest = new PutItemRequest()
+				.withTableName("Tables")
+				.withItem(item);
+
+		dynamoDBClient.putItem(putItemRequest);
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("statusCode", 200);
+		response.put("body", new JSONObject().put("id", id).toString());
+		return response;
+	}
+
+	private Map<String, Object> handleGetTableById(Map<String, Object> request) {
+		String tableId = request.get("pathParameters").toString();
+
+		GetItemSpec spec = new GetItemSpec().withPrimaryKey("id", tableId);
+
+		Table table = dynamoDB.getTable("Tables");
+		JSONObject item = new JSONObject(table.getItem(spec).toJSON());
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("statusCode", 200);
+		response.put("body", item.toString());
+		return response;
+	}
+
+	private Map<String, Object> handleCreateReservation(Map<String, Object> request) {
+		JSONObject requestBody = new JSONObject((String) request.get("body"));
+		String tableNumber = requestBody.getString("tableNumber");
+		String clientName = requestBody.getString("clientName");
+		String phoneNumber = requestBody.getString("phoneNumber");
+		String date = requestBody.getString("date");
+		String slotTimeStart = requestBody.getString("slotTimeStart");
+		String slotTimeEnd = requestBody.getString("slotTimeEnd");
+
+		String reservationId = java.util.UUID.randomUUID().toString();
+		Map<String, AttributeValue> item = new HashMap<>();
+		item.put("reservationId", new AttributeValue(reservationId));
+		item.put("tableNumber", new AttributeValue(tableNumber));
+		item.put("clientName", new AttributeValue(clientName));
+		item.put("phoneNumber", new AttributeValue(phoneNumber));
+		item.put("date", new AttributeValue(date));
+		item.put("slotTimeStart", new AttributeValue(slotTimeStart));
+		item.put("slotTimeEnd", new AttributeValue(slotTimeEnd));
+
+		PutItemRequest putItemRequest = new PutItemRequest()
+				.withTableName("Reservations")
+				.withItem(item);
+
+		dynamoDBClient.putItem(putItemRequest);
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("statusCode", 200);
+		response.put("body", new JSONObject().put("reservationId", reservationId).toString());
+		return response;
+	}
+
+	private Map<String, Object> handleGetReservations(Map<String, Object> request) {
+		Table table = dynamoDB.getTable("Reservations");
+		ScanRequest scanRequest = new ScanRequest().withTableName("Reservations");
+		ScanResult result = dynamoDBClient.scan(scanRequest);
+
+		JSONArray reservations = new JSONArray();
+		result.getItems().forEach(item -> reservations.put(new JSONObject(item)));
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("statusCode", 200);
+		response.put("body", new JSONObject().put("reservations", reservations).toString());
 		return response;
 	}
 }
