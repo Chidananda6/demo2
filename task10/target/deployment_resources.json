@@ -14,14 +14,23 @@
     "subnet_ids" : [ ],
     "security_group_ids" : [ ],
     "dependencies" : [ {
-      "resource_name" : "simple-booking-userpool",
+      "resource_name" : "${booking_userpool}",
       "resource_type" : "cognito_idp"
     } ],
     "event_sources" : [ ],
     "env_variables" : {
-      "CLIENT_ID" : "simple-booking-userpool",
-      "COGNITO_ID" : "simple-booking-userpool",
-      "REGION" : "eu-central-1"
+      "reservations_table" : "${reservations_table}",
+      "tables_table" : "${tables_table}",
+      "Cognito_ID" : {
+        "resource_type" : "cognito_idp",
+        "resource_name" : "${booking_userpool}",
+        "parameter" : "id"
+      },
+      "Client_ID" : {
+        "resource_type" : "cognito_idp",
+        "resource_name" : "${booking_userpool}",
+        "parameter" : "client_id"
+      }
     },
     "publish_version" : false,
     "logs_expiration" : "${logs_expiration}",
