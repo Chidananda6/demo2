@@ -6,14 +6,13 @@
           "Action": [
             "logs:CreateLogGroup",
             "logs:CreateLogStream",
-            "logs:CreateLogGroup",
-            "logs:CreateLogStream",
             "logs:PutLogEvents",
             "dynamodb:GetItem",
             "dynamodb:Query",
             "dynamodb:PutItem",
             "dynamodb:Batch*",
             "dynamodb:DeleteItem",
+            "dynamodb:Scan",
             "ssm:PutParameter",
             "ssm:GetParameter",
             "kms:Decrypt",
@@ -25,7 +24,9 @@
             "cognito-idp:GetIdentityProviderByIdentifier",
             "cognito-idp:ListUserPools",
             "cognito-idp:ListUserPoolClients",
-            "cognito-idp:AdminRespondToAuthChallenge"
+            "cognito-idp:AdminRespondToAuthChallenge",
+            "cognito-idp:AdminConfirmSignUp",
+            "cognito-idp:AdminSetUserPassword"
           ],
           "Effect": "Allow",
           "Resource": "*"
@@ -34,14 +35,6 @@
       "Version": "2012-10-17"
     },
     "resource_type": "iam_policy"
-  },
-  "api_handler-role": {
-    "predefined_policies": [],
-    "principal_service": "lambda",
-    "custom_policies": [
-      "lambda-basic-execution"
-    ],
-    "resource_type": "iam_role"
   },
   "simple-booking-userpool": {
     "resource_type": "cognito_idp",
@@ -67,6 +60,14 @@
         "ALLOW_USER_PASSWORD_AUTH"
       ]
     }
+  },
+  "api_handler-role": {
+    "predefined_policies": [],
+    "principal_service": "lambda",
+    "custom_policies": [
+      "lambda-basic-execution"
+    ],
+    "resource_type": "iam_role"
   },
   "task10_api": {
     "resource_type": "api_gateway",
@@ -134,35 +135,7 @@
           "integration_responses": [],
           "default_error_pattern": true
         }
-      },
-      "/reservations": {
-        "enable_cors": false,
-        "POST": {
-          "authorization_type": "task10_api_authorizer",
-          "integration_type": "lambda",
-          "lambda_name": "api_handler",
-          "enable_proxy": true,
-          "api_key_required": false,
-          "method_request_parameters": {},
-          "integration_request_body_template": {},
-          "responses": [],
-          "integration_responses": [],
-          "default_error_pattern": true
-        },
-        "GET": {
-          "authorization_type": "task10_api_authorizer",
-          "integration_type": "lambda",
-          "lambda_name": "api_handler",
-          "enable_proxy": true,
-          "api_key_required": false,
-          "method_request_parameters": {},
-          "integration_request_body_template": {},
-          "responses": [],
-          "integration_responses": [],
-          "default_error_pattern": true
-        }
-      },
-      "/tables/{tableId}": {
+      },"/tables/{tableId}": {
         "enable_cors": false,
         "GET": {
           "authorization_type": "task10_api_authorizer",
@@ -178,6 +151,7 @@
         }
       }
     },
+
     "authorizers": {
       "task10_api_authorizer": {
         "type": "COGNITO_USER_POOLS",
