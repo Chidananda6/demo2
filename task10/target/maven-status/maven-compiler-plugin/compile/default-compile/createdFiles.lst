@@ -1,10 +1,6 @@
-com\task10\ApiHandler$1.class
+com\task10\ApiHandler$TableResponse.class
 com\task10\ApiHandler.class
-com\task10\dto\SignUp$SignUpBuilder.class
-com\task10\dto\SignIn$SignInBuilder.class
-com\task10\dto\Table.class
-com\task10\dto\Reservation$ReservationBuilder.class
-com\task10\dto\SignIn.class
-com\task10\dto\SignUp.class
-com\task10\dto\Table$TableBuilder.class
-com\task10\dto\Reservation.class
+com\task10\ApiHandler$APIRequest.class
+com\task10\ApiHandler$Table.class
+com\task10\ApiHandler$Reservation.class
+com\task10\ApiHandler$ReservationResponse.class
